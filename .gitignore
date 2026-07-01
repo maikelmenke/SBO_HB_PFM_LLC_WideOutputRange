@@ -1,0 +1,81 @@
+# ============================================================
+#  LLC Analysis & Design — .gitignore
+# ============================================================
+
+# ------ Python bytecode & caches ------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ------ Distribution / packaging ------
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+MANIFEST
+
+# ------ Virtual environments ------
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# ------ Jupyter Notebooks ------
+.ipynb_checkpoints/
+*.ipynb
+
+# ------ Generated outputs (simulation results, plots, reports) ------
+outputs/
+opt/outputs/
+*.csv
+*.pdf
+*.png
+*.svg
+
+# Whitelist: documentation PDF at root
+!Documentation*.pdf
+
+# ------ Spice / ngspice artefacts ------
+*.raw
+*.log
+*.net
+*.cir
+*.op
+
+# ------ IDE & editor settings ------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.spyproject/
+
+# ------ OS artefacts ------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ------ Testing & coverage ------
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ------ Linting / type-checking ------
+.mypy_cache/
+.ruff_cache/
+
+# ------ Miscellaneous ------
+*.bak
+*.tmp
+*.swp
+*~
+
+# Arquivos em desenvolvimento
+*_dev.py
+*_wip.py
+sandbox/
+rascunhos/
