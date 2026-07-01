@@ -13,36 +13,10 @@ import os
 # If no 'score' column is present, plots are skipped for that file.
 # ==============================================================================
  
-RUN_LIST = [
-    # ("1-LLC_GA_20260508_1849_Gen50_Pop250.csv"),
-    # ("2-LLC_GA_20260509_0110_Gen50_Pop250.csv"),
-    # ("3-LLC_GA_20260509_1000_Gen50_Pop250.csv"),
-    # ("4-LLC_GA_20260510_0015_Gen50_Pop250.csv"),
-    # ("5-LLC_GA_20260510_1128_Gen50_Pop250.csv"),
-    # ("6-LLC_GA_20260510_1600_Gen50_Pop250.csv"),
-    # ("7-LLC_GA_20260510_2053_Gen50_Pop250.csv"),
-    # ("8-LLC_GA_20260511_0805_Gen50_Pop250.csv"),
-    # ("9-LLC_GA_20260511_2054_Gen50_Pop250.csv"),
-    # ("10-LLC_GA_20260512_0805_Gen50_Pop250.csv"),
-    # ("11-LLC_GA_20260512_2017_Gen50_Pop250.csv"),
-    # ("12-LLC_GA_20260513_2032_Gen50_Pop250.csv"),
-    # ("13-LLC_GA_20260514_0708_Gen50_Pop250.csv"),
-    #("14-LLC_GA_20260514_1330_Gen50_Pop250.csv"),
-    # ("15-LLC_GA_20260514_2038_Gen50_Pop250.csv"),
-    # ("16-LLC_GA_20260515_0737_Gen50_Pop250.csv"),
-    # ("17-LLC_GA_20260515_1155_Gen50_Pop250.csv"),
-    # ("18-LLC_GA_20260515_1640_Gen50_Pop250.csv"),
-    # ("19-LLC_GA_20260515_2058_Gen50_Pop250.csv"),
-    #("20-LLC_GA_20260516_1710_Gen50_Pop250.csv"),
-    #("21-LLC_GA_20260529_2207_Gen50_Pop250.csv"),
-    #("22-LLC_GA_20260530_0756_Gen50_Pop250.csv"),
-    #("23-LLC_GA_20260530_1342_Gen50_Pop250.csv"),
-    #("LLC_GA_20260613_0803_Gen30_Pop250.csv"),
-    #("LLC_GA_20260613_1551_Gen50_Pop250.csv"),
-    #("LLC_GA_20260613_2057_Gen50_Pop250.csv"),
-    #("LLC_GA_20260614_0847_Gen50_Pop250.csv"),
-    ("LLC_GA_20260630_1237_Gen10_Pop10.csv")
-]
+# Leave empty to auto-discover all LLC_GA_OPT.csv in the outputs directory.
+# For local batch runs with multiple files, add filenames explicitly, e.g.:
+#   RUN_LIST = ["LLC_GA_OPT.csv", "run2.csv"]
+RUN_LIST = []
 
 # Design frequency limits
 FSW_MIN_HZ = 50e3
@@ -1019,5 +993,20 @@ def process_and_plot(filename):
 # --- ENTRY POINT ---
 # ==============================================================================
 if __name__ == '__main__':
-    for _fname in RUN_LIST:
-        process_and_plot(_fname)
+    import glob as _glob
+
+    _active = list(RUN_LIST)
+    if not _active:
+        _fixed = os.path.join(_OUTPUTS_DIR, 'LLC_GA_OPT.csv')
+        if os.path.exists(_fixed):
+            _active = ['LLC_GA_OPT.csv']
+        else:
+            _found = sorted(_glob.glob(os.path.join(_OUTPUTS_DIR, 'LLC_GA_*.csv')))
+            _active = [os.path.basename(f) for f in _found]
+
+    if not _active:
+        print(f"[WARNING] No CSV files found in {_OUTPUTS_DIR}")
+    else:
+        print(f"[INFO] Processing {len(_active)} file(s): {_active}")
+        for _fname in _active:
+            process_and_plot(_fname)

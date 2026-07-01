@@ -179,8 +179,7 @@ if __name__ == '__main__':
         print(f"TOTAL TIME: {int(horas)}h {int(minutos)}m {segundos:.1f}s")
         print(f"========================================")
 
-        timestamp    = datetime.now().strftime("%Y%m%d_%H%M")
-        csv_filename = f"LLC_GA_{timestamp}_Gen{N_GEN}_Pop{POP_SIZE}.csv"
+        csv_filename = "LLC_GA_OPT.csv"
         problem.save_results_to_csv(csv_filename)
 
         backup_path = os.path.join(log_dir, 'LLC_OP_IR_backup.csv')
