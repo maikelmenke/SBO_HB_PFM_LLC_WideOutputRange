@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+# ── 1. Download source repository → /opt/llc (baked into Docker image) ───────
+python3 - <<'EOF'
+import urllib.request, zipfile, os, shutil
+
+url = ('https://github.com/maikelmenke/'
+       'SBO_HB_PFM_LLC_WideOutputRange/archive/refs/heads/codeocean.zip')
+zip_path = '/tmp/llc_pkg.zip'
+req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+with urllib.request.urlopen(req) as resp, open(zip_path, 'wb') as out:
+    out.write(resp.read())
+with zipfile.ZipFile(zip_path, 'r') as z:
+    z.extractall('/tmp/')
+src = '/tmp/SBO_HB_PFM_LLC_WideOutputRange-codeocean'
+dst = '/opt/llc'
+if os.path.exists(dst):
+    shutil.rmtree(dst)
+os.rename(src, dst)
+print(f"Source installed to {dst}")
+EOF
+
+# ── 2. Install Python dependencies (baked into Docker image) ──────────────────
+python3 -m pip install --quiet -r /opt/llc/requirements.txt
+python3 -m pip install --quiet /opt/llc/
+pyspice-post-installation --install-ngspice-dll
+
+# ── 3. Downgrade libngspice0 to v36 (PySpice 1.5-compatible) ─────────────────
+# Ubuntu 24.04 ships ngspice 42 which is incompatible with PySpice 1.5.
+# Replace only the shared library (.so); the ngspice CLI binary is unaffected.
+python3 - <<'EOF'
+import urllib.request
+deb_url = ('http://archive.ubuntu.com/ubuntu/pool/universe/n/ngspice/'
+           'libngspice0_36+ds-1_amd64.deb')
+req = urllib.request.Request(deb_url, headers={'User-Agent': 'Mozilla/5.0'})
+with urllib.request.urlopen(req) as resp, open('/tmp/libngspice0_v36.deb', 'wb') as out:
+    out.write(resp.read())
+print("Downloaded libngspice0 v36")
+EOF
+apt-get install -y --allow-downgrades /tmp/libngspice0_v36.deb
+
+# ── 4. Create unversioned symlink (PySpice calls dlopen('libngspice.so')) ─────
+LIB=/usr/lib/x86_64-linux-gnu
+if [ -f "$LIB/libngspice.so.0" ] && [ ! -f "$LIB/libngspice.so" ]; then
+    ln -s "$LIB/libngspice.so.0" "$LIB/libngspice.so"
+    echo "Created $LIB/libngspice.so"
+fi
